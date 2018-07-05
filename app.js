@@ -1,5 +1,5 @@
-//let socket = io('http://ec2-54-93-171-91.eu-central-1.compute.amazonaws.com:5000');
-let socket = io('http://localhost:8008');
+let socket = io('http://ec2-54-93-171-91.eu-central-1.compute.amazonaws.com:8008');
+//let socket = io('http://localhost:8008');
 
 let chess = new Chess();
 
@@ -43,6 +43,7 @@ function getallMoves()
        // console.log(i);
         //console.log(chess.moves({square : i}));
         let mvs = chess.moves({square: i});
+		//console.log(mvs);
         if(mvs.length != 0)
         {
             for(var o of mvs)
@@ -50,7 +51,8 @@ function getallMoves()
                 let move;
                 if(o.length >= 3)
                 {
-                    move = i + o.substring(1,3);
+                    move = i + o.substr(-2);
+					console.log(move);
                 }
                 else
                 {
