@@ -9,7 +9,7 @@ let onDrop = function(source, target, piece, newPos, oldPos, orientation) {
     if(source !== target) {
 
         if(chess.move(source + target, {sloppy: true}) == null) return 'snapback';
-			if(count == 0)
+			if(count == 1)
 			{
 				socket.emit('receive', {
 				FEN: chess.fen(),
@@ -34,26 +34,7 @@ function sleep (time) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
 
-function start(){
-	if(count == 0)
-		{
-			socket.emit('receive', {
-			FEN: chess.fen(),
-			ID_game: 0,
-			turns: getallMoves()
-			})
-			count = 1;
-		}
-		else
-		{
-			socket2.emit('receive', {
-			FEN: chess.fen(),
-			ID_game: 0,
-			turns: getallMoves()
-			})
-			count = 0;
-		}
-}
+
 
 let cfg = {
     draggable: true,
@@ -63,22 +44,40 @@ let cfg = {
 
 let board = ChessBoard('board', cfg);
 
+function start(){
+	if(count == 1)
+		{
+			socket.emit('receive', {
+			FEN: chess.fen(),
+			ID_game: 0,
+			turns: getallMoves()
+			})
+			count = 0;
+		}
+		else
+		{
+			socket2.emit('receive', {
+			FEN: chess.fen(),
+			ID_game: 0
+			})
+			count = 1;
+		}
+};
+
 socket.on('makeMove', data => {
-    console.log(typeof (data));
-    console.log(data);
+    console.log("ki1:" + data.Move);
     chess.move(data.Move, {sloppy: true});
     board.move(data.Move.substr(0,2) + '-' + data.Move.substr(2,4));
-	sleep(10).then(() => {
+	sleep(100).then(() => {
 		start();
 	});
 	
 });
 socket2.on('makeMove', data => {
-    console.log(typeof (data));
-    console.log(data);
+    console.log("ki2:" + data);
     chess.move(data, {sloppy: true});
     board.move(data.substr(0,2) + '-' + data.substr(2,4));
-	sleep(10).then(() => {
+	sleep(100).then(() => {
 		start();
 	});
 });
@@ -87,7 +86,6 @@ function getallMoves()
 {
     let chesspos = ['a1','a2','a3','a4','a5','a6','a7','a8','b1','b2','b3','b4','b5','b6','b7','b8','c1','c2','c3','c4','c5','c6','c7','c8','d1','d2','d3','d4','d5','d6','d7','d8','e1','e2','e3','e4','e5','e6','e7','e8','f1','f2','f3','f4','f5','f6','f7','f8','g1','g2','g3','g4','g5','g6','g7','g8','h1','h2','h3','h4','h5','h6','h7','h8'];
     let chessmoves = [];
-    console.log(chesspos);
     for(var i of chesspos)
     {
        // console.log(i);
@@ -102,7 +100,6 @@ function getallMoves()
                 if(o.length >= 3)
                 {
                     move = i + o.substr(-2);
-					console.log(move);
                 }
                 else
                 {
@@ -113,9 +110,6 @@ function getallMoves()
         }
     }
     return chessmoves;
-    console.log(chessmoves);
-
-
 }
-start()
+
 
