@@ -1,22 +1,59 @@
 let socket = io('http://ec2-54-93-171-91.eu-central-1.compute.amazonaws.com:8008');
 //let socket = io('http://localhost:8008');
-
+let socket2 = io('http://ec2-54-93-171-91.eu-central-1.compute.amazonaws.com:5000');
 let chess = new Chess();
-
+let count = 0;
 let onDrop = function(source, target, piece, newPos, oldPos, orientation) {
 //console.log(chess.fen());
 //console.log(chess.moves({sloppy: true}));
     if(source !== target) {
 
         if(chess.move(source + target, {sloppy: true}) == null) return 'snapback';
+			if(count == 0)
+			{
+				socket.emit('receive', {
+				FEN: chess.fen(),
+				ID_game: 0,
+				turns: getallMoves()
+				})
+				count = 1;
+			}
+			else
+			{
+				socket2.emit('receive', {
+				FEN: chess.fen(),
+				ID_game: 0,
+				turns: getallMoves()
+				})
+				count = 0;
+			}
 
-        socket.emit('receive', {
-            FEN: chess.fen(),
-            ID_game: 0,
-            turns: getallMoves()
-        })
     }
 };
+function sleep (time) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
+
+function start(){
+	if(count == 0)
+		{
+			socket.emit('receive', {
+			FEN: chess.fen(),
+			ID_game: 0,
+			turns: getallMoves()
+			})
+			count = 1;
+		}
+		else
+		{
+			socket2.emit('receive', {
+			FEN: chess.fen(),
+			ID_game: 0,
+			turns: getallMoves()
+			})
+			count = 0;
+		}
+}
 
 let cfg = {
     draggable: true,
@@ -31,6 +68,19 @@ socket.on('makeMove', data => {
     console.log(data);
     chess.move(data.Move, {sloppy: true});
     board.move(data.Move.substr(0,2) + '-' + data.Move.substr(2,4));
+	sleep(10).then(() => {
+		start();
+	});
+	
+});
+socket2.on('makeMove', data => {
+    console.log(typeof (data));
+    console.log(data);
+    chess.move(data, {sloppy: true});
+    board.move(data.substr(0,2) + '-' + data.substr(2,4));
+	sleep(10).then(() => {
+		start();
+	});
 });
 
 function getallMoves()
@@ -67,3 +117,5 @@ function getallMoves()
 
 
 }
+start()
+
