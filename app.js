@@ -45,14 +45,14 @@ let cfg = {
 let board = ChessBoard('board', cfg);
 
 function start(){
-	if(count == 1)
+	if(count == 0)
 		{
 			socket.emit('receive', {
 			FEN: chess.fen(),
 			ID_game: 0,
 			turns: getallMoves()
 			})
-			count = 0;
+			count = 1;
 		}
 		else
 		{
@@ -60,7 +60,7 @@ function start(){
 			FEN: chess.fen(),
 			ID_game: 0
 			})
-			count = 1;
+			count = 0;
 		}
 };
 
@@ -68,7 +68,7 @@ socket.on('makeMove', data => {
     console.log("ki1:" + data.Move);
     chess.move(data.Move, {sloppy: true});
     board.move(data.Move.substr(0,2) + '-' + data.Move.substr(2,4));
-	sleep(100).then(() => {
+	sleep(200).then(() => {
 		start();
 	});
 	
@@ -77,7 +77,7 @@ socket2.on('makeMove', data => {
     console.log("ki2:" + data);
     chess.move(data, {sloppy: true});
     board.move(data.substr(0,2) + '-' + data.substr(2,4));
-	sleep(100).then(() => {
+	sleep(200).then(() => {
 		start();
 	});
 });
@@ -99,13 +99,22 @@ function getallMoves()
                 let move;
                 if(o.length >= 3)
                 {
-                    move = i + o.substr(-2);
+					if(o.includes("+") ||  o.includes("#"))
+					{
+						move = i + o.substr(-3,-1);
+						chessmoves.push(move);
+					}
+					else
+					{
+						move = i + o.substr(-2);
+						chessmoves.push(move);
+					}
                 }
-                else
+                else if(o.length == 3)
                 {
                     move = i + o;
+					chessmoves.push(move);
                 }
-                chessmoves.push(move);
             }
         }
     }
