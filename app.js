@@ -49,16 +49,22 @@ function getallMoves()
             for(var o of mvs)
             {
                 let move;
-                if(o.length >= 3)
-                {
-                    move = i + o.substr(-2);
-					console.log(move);
-                }
-                else
-                {
-                    move = i + o;
-                }
-                chessmoves.push(move);
+				if(o.includes("+") ||  o.includes("#"))
+				{
+					move = i + o.substr(-3,-1);
+					if(move.length > 2)
+					{
+						chessmoves.push(move);
+					}	
+				}
+				else
+				{
+					move = i + o.substr(-2);
+					if(move.length > 2)
+					{
+						chessmoves.push(move);
+					}
+				}
             }
         }
     }
