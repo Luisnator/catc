@@ -28,9 +28,9 @@ let board = ChessBoard('board', cfg);
 
 socket.on('makeMove', data => {
     console.log(typeof (data));
-    console.log(data);
-    chess.move(data.Move, {sloppy: true});
-    board.move(data.Move.substr(0,2) + '-' + data.Move.substr(2,4));
+    console.log(data.FEN);
+	chess = new Chess(data.FEN);
+	board.position(data.FEN, true)
 });
 
 function getallMoves()
